@@ -1,5 +1,5 @@
 import React from 'react';
-import { Shield, Globe, Activity, Users } from 'lucide-react';
+import { Shield, Activity, Users } from 'lucide-react';
 
 export const ChatHeader: React.FC = () => {
   return (
@@ -33,10 +33,6 @@ export const ChatHeader: React.FC = () => {
         
         {/* Feature Pills */}
         <div className="flex flex-wrap gap-2 md:gap-3 mt-4">
-          <div className="flex items-center gap-2 bg-gradient-to-r from-blue-50 to-indigo-50 px-3 py-1 rounded-full border border-blue-200">
-            <Globe className="w-4 h-4 text-blue-600" />
-            <span className="text-xs md:text-sm font-medium text-blue-800">5 Languages</span>
-          </div>
           <div className="flex items-center gap-2 bg-gradient-to-r from-green-50 to-emerald-50 px-3 py-1 rounded-full border border-green-200">
             <Activity className="w-4 h-4 text-green-600" />
             <span className="text-xs md:text-sm font-medium text-green-800">AI-Powered</span>
