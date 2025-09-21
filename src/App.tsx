@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { AlertCircle, Key, Loader2, Mail, Linkedin, Globe, Activity } from 'lucide-react';
+import { AlertCircle, Key, Loader2, Globe, Activity } from 'lucide-react';
 import { openaiService, type TriageAnalysis } from './services/openaiService';
 import { ChatHeader } from './components/ChatHeader';
 import { ChatMessage } from './components/ChatMessage';
@@ -208,9 +208,6 @@ function App() {
                 >
                   <option value="english">🇺🇸 English</option>
                   <option value="arabic">🇸🇦 العربية (Arabic)</option>
-                  <option value="bangla">🇧🇩 বাংলা (Bangla)</option>
-                  <option value="tamil">🇮🇳 தமிழ் (Tamil)</option>
-                  <option value="hindi">🇮🇳 हिन्दी (Hindi)</option>
                 </select>
               </div>
               
@@ -269,53 +266,6 @@ function App() {
                   <Globe className="mr-1" size={14} />
                   React & Tailwind
                 </span>
-              </div>
-            </div>
-            
-            {/* Developer Information */}
-            <div className="border-t border-white/20 pt-3 md:pt-4">
-              <div className="flex flex-col lg:flex-row items-center justify-between space-y-2 md:space-y-3 lg:space-y-0">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-blue-400">
-                    <img 
-                      src="/rayray.jpeg" 
-                      alt="MD ABU RAYHAN" 
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div className="text-left">
-                    <p className="text-xs text-gray-300">Founder & Developer</p>
-                    <p className="text-sm md:text-lg font-bold text-blue-200">MD ABU RAYHAN</p>
-                  </div>
-                </div>
-                
-                <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4">
-                  <a 
-                    href="mailto:m.rayhan@student.unsw.edu.au"
-                    className="flex items-center space-x-2 bg-white/10 hover:bg-white/20 px-3 py-2 rounded-lg transition-all duration-200 text-xs md:text-sm"
-                    title="Email"
-                  >
-                    <Mail size={16} className="text-blue-300" />
-                    <span className="text-gray-200 hidden sm:inline">m.rayhan@student.unsw.edu.au</span>
-                    <span className="text-gray-200 sm:hidden">Email</span>
-                  </a>
-                  <a 
-                    href="https://www.linkedin.com/in/md-abu-rayhan-854b3b1a9/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 px-3 py-2 rounded-lg transition-all duration-200 text-xs md:text-sm"
-                    title="LinkedIn Profile"
-                  >
-                    <Linkedin size={16} className="text-white" />
-                    <span className="text-white font-medium">LinkedIn</span>
-                  </a>
-                </div>
-              </div>
-              
-              <div className="mt-3 md:mt-4 pt-2 md:pt-3 border-t border-white/10">
-                <p className="text-xs text-gray-400">
-                  © 2024 UNSW Sydney. Research prototype only.
-                </p>
               </div>
             </div>
           </div>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { MessageCircle, Globe, Stethoscope, Shield, Users } from 'lucide-react';
+import { MessageCircle, Globe, Stethoscope, Shield } from 'lucide-react';
 
 export const WelcomeMessage: React.FC = () => {
   return (
@@ -35,8 +35,8 @@ export const WelcomeMessage: React.FC = () => {
               <div className="p-3 bg-green-100 rounded-full mb-4">
                 <Globe className="h-6 w-6 text-green-600" />
               </div>
-              <h3 className="font-semibold text-gray-900 mb-2 text-sm md:text-base">5 Languages</h3>
-              <p className="text-sm text-gray-600">English, Arabic, Bangla, Tamil, Hindi</p>
+              <h3 className="font-semibold text-gray-900 mb-2 text-sm md:text-base">2 Languages</h3>
+              <p className="text-sm text-gray-600">English, Arabic</p>
             </div>
           </div>
           
@@ -68,7 +68,7 @@ export const WelcomeMessage: React.FC = () => {
             </div>
             <div className="bg-white/70 rounded-lg p-3 md:p-4 text-blue-700">
               <strong>Use your language:</strong><br />
-              "আমার মাথা ব্যথা করছে" (Bangla)
+              "أشعر بألم في الصدر" (Arabic)
             </div>
             <div className="bg-white/70 rounded-lg p-3 md:p-4 text-blue-700">
               <strong>Cultural support:</strong><br />
