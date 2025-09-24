@@ -16,7 +16,7 @@ export const ChatHeader: React.FC = () => {
             </div>
             <div>
               <h1 className="text-lg md:text-2xl lg:text-3xl font-bold text-gray-900 mb-1">
-                TRIBOT Multilingual Triage Assistant
+                TRIBOT Prototype
               </h1>
               <p className="text-xs md:text-sm lg:text-base text-blue-600 font-medium">
                 NHMRC Research Study - AI-Powered Chat Interface

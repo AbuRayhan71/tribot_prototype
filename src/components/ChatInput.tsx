@@ -12,9 +12,7 @@ interface ChatInputProps {
 export const ChatInput: React.FC<ChatInputProps> = ({ 
   onSendMessage, 
   isLoading, 
-  language, 
-  onLanguageChange 
-}) => {
+  language}) => {
   const [message, setMessage] = useState('');
   const [isRecording, setIsRecording] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
