@@ -1,5 +1,5 @@
 import React from 'react';
-import { MessageCircle, Stethoscope, Shield } from 'lucide-react';
+import { MessageCircle, Globe, Stethoscope, Shield } from 'lucide-react';
 
 export const WelcomeMessage: React.FC = () => {
   return (
@@ -19,7 +19,7 @@ export const WelcomeMessage: React.FC = () => {
         </p>
         
         {/* Feature Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-8 md:mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-8 md:mb-12">
           <div className="bg-white rounded-xl p-4 md:p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300">
             <div className="flex flex-col items-center text-center">
               <div className="p-3 bg-blue-100 rounded-full mb-4">
@@ -27,6 +27,16 @@ export const WelcomeMessage: React.FC = () => {
               </div>
               <h3 className="font-semibold text-gray-900 mb-2 text-sm md:text-base">Natural Conversation</h3>
               <p className="text-sm text-gray-600">Chat naturally about your symptoms</p>
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-xl p-4 md:p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300">
+            <div className="flex flex-col items-center text-center">
+              <div className="p-3 bg-green-100 rounded-full mb-4">
+                <Globe className="h-6 w-6 text-green-600" />
+              </div>
+              <h3 className="font-semibold text-gray-900 mb-2 text-sm md:text-base">6 Languages</h3>
+              <p className="text-sm text-gray-600">English, Arabic, Bengali, Hindi, Vietnamese, Chinese</p>
             </div>
           </div>
           
@@ -58,7 +68,7 @@ export const WelcomeMessage: React.FC = () => {
             </div>
             <div className="bg-white/70 rounded-lg p-3 md:p-4 text-blue-700">
               <strong>Use your language:</strong><br />
-              "أشعر بألم في الصدر" (Arabic)
+              "আমার মাথা ব্যথা করছে" (Bengali)
             </div>
             <div className="bg-white/70 rounded-lg p-3 md:p-4 text-blue-700">
               <strong>Cultural support:</strong><br />

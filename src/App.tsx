@@ -208,6 +208,10 @@ function App() {
                 >
                   <option value="english">🇺🇸 English</option>
                   <option value="arabic">🇸🇦 العربية (Arabic)</option>
+                  <option value="bengali">🇧🇩 বাংলা (Bengali)</option>
+                  <option value="hindi">🇮🇳 हिंदी (Hindi)</option>
+                  <option value="vietnamese">🇻🇳 Tiếng Việt (Vietnamese)</option>
+                  <option value="chinese">🇨🇳 中文 (Chinese)</option>
                 </select>
               </div>
               
