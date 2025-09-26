@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { AlertCircle, Key, Loader2, Globe, Activity } from 'lucide-react';
+import { AlertCircle, Key, Loader2, Globe, Activity, MessageSquare, Users } from 'lucide-react';
 import { openaiService, type TriageAnalysis } from './services/openaiService';
 import { ChatHeader } from './components/ChatHeader';
 import { ChatMessage } from './components/ChatMessage';
 import { ChatInput } from './components/ChatInput';
 import { WelcomeMessage } from './components/WelcomeMessage';
+import { InterpreterServices } from './components/InterpreterServices';
 
 interface Message {
   id: string;
@@ -13,7 +14,10 @@ interface Message {
   timestamp: Date;
   language?: string;
   analysis?: TriageAnalysis;
+  isUnderstandingFailure?: boolean;
 }
+
+type TabType = 'chat' | 'interpreter';
 
 function App() {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -21,6 +25,9 @@ function App() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
   const [isConfigured, setIsConfigured] = useState<boolean>(false);
+  const [activeTab, setActiveTab] = useState<TabType>('chat');
+  const [failedAttempts, setFailedAttempts] = useState<number>(0);
+  const [showInterpreterServices, setShowInterpreterServices] = useState<boolean>(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -64,24 +71,70 @@ function App() {
       const conversationHistory = messages.slice(-6);
       const analysis = await openaiService.analyzeSymptoms(content, selectedLanguage, conversationHistory);
       
-      const botMessage: Message = {
-        id: generateId(),
-        type: 'bot',
-        content: analysis.conversationalResponse || `I've analyzed your symptoms and here's my assessment:`,
-        timestamp: new Date(),
-        analysis
-      };
-
-      setMessages(prev => [...prev, botMessage]);
+      // Check if AI has low confidence or indicates understanding issues
+      const isLowConfidence = analysis.confidence < 70;
+      const hasUnderstandingIssues = analysis.fallbackMechanism.isActivated;
+      
+      if (isLowConfidence || hasUnderstandingIssues) {
+        setFailedAttempts(prev => prev + 1);
+        
+        let fallbackMessage = '';
+        
+        if (failedAttempts === 0) {
+          // First attempt - ask to repeat
+          fallbackMessage = "Sorry, I can't fully understand your conversation. Can you please repeat this or try describing your symptoms in a different way?";
+        } else if (failedAttempts >= 1) {
+          // Second attempt - offer interpreter services
+          fallbackMessage = "Sorry, I still can't understand the conversation completely. I am now going to connect you to our Human Interpreter services for better assistance.";
+          setShowInterpreterServices(true);
+          setActiveTab('interpreter');
+        }
+        
+        const botMessage: Message = {
+          id: generateId(),
+          type: 'bot',
+          content: fallbackMessage,
+          timestamp: new Date(),
+          analysis,
+          isUnderstandingFailure: true
+        };
+        
+        setMessages(prev => [...prev, botMessage]);
+      } else {
+        // Reset failed attempts on successful understanding
+        setFailedAttempts(0);
+        
+        const botMessage: Message = {
+          id: generateId(),
+          type: 'bot',
+          content: analysis.conversationalResponse || `I've analyzed your symptoms and here's my assessment:`,
+          timestamp: new Date(),
+          analysis
+        };
+        
+        setMessages(prev => [...prev, botMessage]);
+      }
     } catch (err) {
+      setFailedAttempts(prev => prev + 1);
       const errorMessage = err instanceof Error ? err.message : 'An error occurred during analysis';
       setError(errorMessage);
+      
+      let fallbackContent = '';
+      
+      if (failedAttempts === 0) {
+        fallbackContent = "Sorry, I can't understand your conversation. Can you please repeat this or try describing your symptoms in a different way?";
+      } else {
+        fallbackContent = "Sorry, I still can't understand the conversation completely. I am now going to connect you to our Human Interpreter services for better assistance.";
+        setShowInterpreterServices(true);
+        setActiveTab('interpreter');
+      }
       
       const errorBotMessage: Message = {
         id: generateId(),
         type: 'bot',
-        content: `I'm sorry, but I encountered an issue while analyzing your symptoms. ${errorMessage}. Please try describing your symptoms again, or let me know if you need any help.`,
-        timestamp: new Date()
+        content: fallbackContent,
+        timestamp: new Date(),
+        isUnderstandingFailure: true
       };
 
       setMessages(prev => [...prev, errorBotMessage]);
@@ -94,6 +147,20 @@ function App() {
   const clearChat = () => {
     setMessages([]);
     setError('');
+    setFailedAttempts(0);
+    setShowInterpreterServices(false);
+    setActiveTab('chat');
+  };
+
+  const handleInterpreterConnect = () => {
+    const connectionMessage: Message = {
+      id: generateId(),
+      type: 'bot',
+      content: "You are being connected to our Human Interpreter service at 02 8738 6088. Please hold while we establish the connection.",
+      timestamp: new Date()
+    };
+    
+    setMessages(prev => [...prev, connectionMessage]);
   };
 
   // Debug: Log render
@@ -145,101 +212,151 @@ function App() {
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-teal-50 flex flex-col">
       <ChatHeader />
       
-      {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col">
-        <div className="flex-1 overflow-y-auto">
-          <div className="max-w-4xl mx-auto px-4 py-6">
-            {messages.length === 0 ? (
-              <WelcomeMessage />
-            ) : (
-              <div className="space-y-6">
-                {messages.map((message) => (
-                  <ChatMessage key={message.id} message={message} />
-                ))}
-                {isLoading && (
-                  <div className="flex gap-4 mb-6">
-                    <div className="flex-shrink-0">
-                      <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-full flex items-center justify-center shadow-lg">
-                        <Loader2 className="w-5 h-5 text-white animate-spin" />
-                      </div>
-                    </div>
-                    <div className="max-w-3xl">
-                      <div className="bg-gradient-to-r from-emerald-50 to-teal-50 border-2 border-emerald-200 rounded-2xl px-6 py-4 shadow-lg">
-                        <div className="flex items-center gap-3 text-emerald-700">
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                          <span className="font-medium">Let me think about your symptoms...</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-                <div ref={messagesEndRef} />
+      {/* Tab Navigation */}
+      <div className="bg-white border-b border-gray-200 shadow-sm">
+        <div className="max-w-4xl mx-auto px-4">
+          <div className="flex gap-0">
+            <button
+              onClick={() => setActiveTab('chat')}
+              className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors duration-200 ${
+                activeTab === 'chat'
+                  ? 'text-blue-600 border-blue-600 bg-blue-50/50'
+                  : 'text-gray-600 border-transparent hover:text-gray-800 hover:border-gray-300'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <MessageSquare className="w-4 h-4" />
+                AI Triage Chat
               </div>
-            )}
+            </button>
+            <button
+              onClick={() => setActiveTab('interpreter')}
+              className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors duration-200 relative ${
+                activeTab === 'interpreter'
+                  ? 'text-orange-600 border-orange-600 bg-orange-50/50'
+                  : 'text-gray-600 border-transparent hover:text-gray-800 hover:border-gray-300'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <Users className="w-4 h-4" />
+                Human Interpreter
+                {showInterpreterServices && (
+                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+                )}
+              </div>
+            </button>
           </div>
         </div>
+      </div>
+      
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col">
+        {activeTab === 'chat' ? (
+          <>
+            <div className="flex-1 overflow-y-auto">
+              <div className="max-w-4xl mx-auto px-4 py-6">
+                {messages.length === 0 ? (
+                  <WelcomeMessage />
+                ) : (
+                  <div className="space-y-6">
+                    {messages.map((message) => (
+                      <ChatMessage key={message.id} message={message} />
+                    ))}
+                    {isLoading && (
+                      <div className="flex gap-4 mb-6">
+                        <div className="flex-shrink-0">
+                          <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-full flex items-center justify-center shadow-lg">
+                            <Loader2 className="w-5 h-5 text-white animate-spin" />
+                          </div>
+                        </div>
+                        <div className="max-w-3xl">
+                          <div className="bg-gradient-to-r from-emerald-50 to-teal-50 border-2 border-emerald-200 rounded-2xl px-6 py-4 shadow-lg">
+                            <div className="flex items-center gap-3 text-emerald-700">
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                              <span className="font-medium">Let me think about your symptoms...</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    <div ref={messagesEndRef} />
+                  </div>
+                )}
+              </div>
+            </div>
 
-        {/* Error Display */}
-        {error && (
-          <div className="max-w-4xl mx-auto px-4 pb-4">
-            <div className="bg-red-50 border-l-4 border-red-400 p-4 rounded-r-xl shadow-sm">
-              <div className="flex">
-                <AlertCircle className="h-5 w-5 text-red-400 mr-3 flex-shrink-0 mt-0.5" />
-                <div>
-                  <h3 className="text-sm font-semibold text-red-800">I encountered an issue</h3>
-                  <p className="text-sm text-red-700 mt-1">{error}</p>
+            {/* Error Display */}
+            {error && (
+              <div className="max-w-4xl mx-auto px-4 pb-4">
+                <div className="bg-red-50 border-l-4 border-red-400 p-4 rounded-r-xl shadow-sm">
+                  <div className="flex">
+                    <AlertCircle className="h-5 w-5 text-red-400 mr-3 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <h3 className="text-sm font-semibold text-red-800">I encountered an issue</h3>
+                      <p className="text-sm text-red-700 mt-1">{error}</p>
+                    </div>
+                  </div>
                 </div>
               </div>
+            )}
+
+            {/* Chat Input Area */}
+            <div className="bg-white border-t border-gray-200 p-4 md:p-6 shadow-lg">
+              <div className="max-w-4xl mx-auto">
+                {/* Language Selector and AI Status */}
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-4">
+                  <div className="flex items-center gap-2">
+                    <Globe className="w-4 h-4 text-gray-600" />
+                    <select
+                      value={language}
+                      onChange={(e) => setLanguage(e.target.value)}
+                      className="px-3 py-2 border border-gray-200 rounded-lg focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all duration-200 bg-white text-sm font-medium min-w-[200px]"
+                    >
+                      <option value="english">🇺🇸 English</option>
+                      <option value="arabic">🇸🇦 العربية (Arabic)</option>
+                      <option value="bengali">🇧🇩 বাংলা (Bengali)</option>
+                      <option value="hindi">🇮🇳 हिंदी (Hindi)</option>
+                      <option value="vietnamese">🇻🇳 Tiếng Việt (Vietnamese)</option>
+                      <option value="chinese">🇨🇳 中文 (Chinese)</option>
+                    </select>
+                  </div>
+                  
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <span className="text-xs md:text-sm text-green-600 font-medium">AI Ready</span>
+                    </div>
+                    {messages.length > 0 && (
+                      <button
+                        onClick={clearChat}
+                        className="text-xs md:text-sm text-blue-600 hover:text-blue-800 transition-colors duration-200 font-medium bg-blue-50 px-3 py-2 rounded-lg hover:bg-blue-100"
+                      >
+                        New Chat
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Chat Input */}
+                <ChatInput
+                  onSendMessage={handleSendMessage}
+                  isLoading={isLoading}
+                  language={language}
+                  onLanguageChange={setLanguage}
+                />
+              </div>
+            </div>
+          </>
+        ) : (
+          <div className="flex-1 overflow-y-auto">
+            <div className="max-w-4xl mx-auto px-4 py-6">
+              <InterpreterServices
+                onConnect={handleInterpreterConnect}
+                language={language}
+              />
             </div>
           </div>
         )}
-
-        {/* Chat Input Area */}
-        <div className="bg-white border-t border-gray-200 p-4 md:p-6 shadow-lg">
-          <div className="max-w-4xl mx-auto">
-            {/* Language Selector and AI Status */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-4">
-              <div className="flex items-center gap-2">
-                <Globe className="w-4 h-4 text-gray-600" />
-                <select
-                  value={language}
-                  onChange={(e) => setLanguage(e.target.value)}
-                  className="px-3 py-2 border border-gray-200 rounded-lg focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all duration-200 bg-white text-sm font-medium min-w-[200px]"
-                >
-                  <option value="english">🇺🇸 English</option>
-                  <option value="arabic">🇸🇦 العربية (Arabic)</option>
-                  <option value="bengali">🇧🇩 বাংলা (Bengali)</option>
-                  <option value="hindi">🇮🇳 हिंदी (Hindi)</option>
-                  <option value="vietnamese">🇻🇳 Tiếng Việt (Vietnamese)</option>
-                  <option value="chinese">🇨🇳 中文 (Chinese)</option>
-                </select>
-              </div>
-              
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span className="text-xs md:text-sm text-green-600 font-medium">AI Ready</span>
-                </div>
-                {messages.length > 0 && (
-                  <button
-                    onClick={clearChat}
-                    className="text-xs md:text-sm text-blue-600 hover:text-blue-800 transition-colors duration-200 font-medium bg-blue-50 px-3 py-2 rounded-lg hover:bg-blue-100"
-                  >
-                    New Chat
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* Chat Input */}
-            <ChatInput
-              onSendMessage={handleSendMessage}
-              isLoading={isLoading}
-              language={language}
-              onLanguageChange={setLanguage}
-            />
-          </div>
-        </div>
       </div>
 
       {/* Enhanced Footer */}
