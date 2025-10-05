@@ -7,6 +7,7 @@ import { ChatInput } from './components/ChatInput';
 import { WelcomeMessage } from './components/WelcomeMessage';
 import { InterpreterServices } from './components/InterpreterServices';
 import KillSwitch from './components/KillSwitch';
+import ConsentForm from './components/ConsentForm';
 
 interface Message {
   id: string;
@@ -30,6 +31,7 @@ function App() {
   const [failedAttempts, setFailedAttempts] = useState<number>(0);
   const [showInterpreterServices, setShowInterpreterServices] = useState<boolean>(false);
   const [isSystemHalted, setIsSystemHalted] = useState(false);
+  const [hasConsented, setHasConsented] = useState<boolean | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -170,6 +172,10 @@ function App() {
     setMessages([]);
     setError('');
     // Additional halting logic here
+  };
+
+  const handleConsent = (consented: boolean) => {
+    setHasConsented(consented);
   };
 
   // Debug: Log render
@@ -414,6 +420,19 @@ function App() {
               Restart
             </button>
           </div>
+        </div>
+      )}
+      {hasConsented === null && <ConsentForm onConsent={handleConsent} />}
+      {hasConsented === false && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg text-center">
+            <p className="text-lg font-semibold">Consent declined. You cannot use TRIBOT.</p>
+          </div>
+        </div>
+      )}
+      {hasConsented === true && (
+        <div>
+          {/* Rest of your app components */}
         </div>
       )}
     </div>
