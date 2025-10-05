@@ -6,6 +6,7 @@ import { ChatMessage } from './components/ChatMessage';
 import { ChatInput } from './components/ChatInput';
 import { WelcomeMessage } from './components/WelcomeMessage';
 import { InterpreterServices } from './components/InterpreterServices';
+import KillSwitch from './components/KillSwitch';
 
 interface Message {
   id: string;
@@ -28,6 +29,7 @@ function App() {
   const [activeTab, setActiveTab] = useState<TabType>('chat');
   const [failedAttempts, setFailedAttempts] = useState<number>(0);
   const [showInterpreterServices, setShowInterpreterServices] = useState<boolean>(false);
+  const [isSystemHalted, setIsSystemHalted] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -162,6 +164,13 @@ function App() {
     
     setMessages(prev => [...prev, connectionMessage]);
   };
+  const handleKillSwitch = () => {
+    setIsSystemHalted(true);
+    // Clear chat and disable inputs
+    setMessages([]);
+    setError('');
+    // Additional halting logic here
+  };
 
   // Debug: Log render
   console.log('App rendering - isConfigured:', isConfigured);
@@ -210,6 +219,7 @@ function App() {
   console.log('Rendering main app interface');
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-teal-50 flex flex-col">
+      {!isSystemHalted && <KillSwitch onStop={handleKillSwitch} />}
       <ChatHeader />
       
       {/* Tab Navigation */}
@@ -343,6 +353,7 @@ function App() {
                   isLoading={isLoading}
                   language={language}
                   onLanguageChange={setLanguage}
+                  isDisabled={isSystemHalted}
                 />
               </div>
             </div>
@@ -392,6 +403,19 @@ function App() {
           </div>
         </div>
       </footer>
+      {isSystemHalted && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-40">
+          <div className="bg-white p-6 rounded-lg text-center">
+            <p className="text-lg font-semibold">System halted. Please restart to continue.</p>
+            <button 
+              onClick={() => window.location.reload()} 
+              className="mt-4 bg-blue-500 text-white px-4 py-2 rounded"
+            >
+              Restart
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

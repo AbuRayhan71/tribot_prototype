@@ -7,12 +7,14 @@ interface ChatInputProps {
   isLoading: boolean;
   language: string;
   onLanguageChange: (language: string) => void;
+  isDisabled?: boolean;
 }
 
 export const ChatInput: React.FC<ChatInputProps> = ({ 
   onSendMessage, 
   isLoading, 
-  language}) => {
+  language,
+  isDisabled = false}) => {
   const [message, setMessage] = useState('');
   const [isRecording, setIsRecording] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
@@ -151,7 +153,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             className="w-full px-4 py-3 md:py-4 pr-12 md:pr-14 border border-gray-200 rounded-2xl focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all duration-200 resize-none bg-white min-h-[48px] md:min-h-[56px] max-h-32 text-gray-800 placeholder-gray-400 text-sm md:text-base"
             dir={isRTLLanguage(language) ? 'rtl' : 'ltr'}
             rows={1}
-            disabled={isLoading || isTranscribing}
+            disabled={isLoading || isTranscribing || isDisabled}
           />
           <button
             type="button"
@@ -164,7 +166,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             }`}
             title={isRecording ? "Stop recording" : isTranscribing ? "Transcribing..." : "Voice input"}
-            disabled={isLoading || isTranscribing}
+            disabled={isLoading || isTranscribing || isDisabled}
           >
             {isRecording ? <Square size={16} className="md:w-[18px] md:h-[18px]" /> : <Mic size={16} className="md:w-[18px] md:h-[18px]" />}
           </button>
@@ -172,7 +174,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         
         <button
           type="submit"
-          disabled={!message.trim() || isLoading || isTranscribing}
+          disabled={!message.trim() || isLoading || isTranscribing || isDisabled}
           className="p-3 md:p-4 bg-blue-500 text-white rounded-2xl hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl min-w-[48px] md:min-w-[56px]"
           title="Send message"
         >
