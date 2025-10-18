@@ -21,8 +21,8 @@ const ConsentForm: React.FC<ConsentFormProps> = ({ onConsent }) => {
         <h2 className="text-xl font-bold mb-4">Digital Consent Form</h2>
         <div className="mb-4">
           <p className="text-sm mb-2">
-            By using TRIBOT, you consent to the collection and processing of your data for medical triage purposes. 
-            This includ symptom analysis, cultural consideesrations, and emergency response coordination.
+            By using TRIBOT, you consent to the collection and processing of your data for medical triage purposes.
+            This includes symptom analysis, cultural considerations, and emergency response coordination.
           </p>
           <button
             onClick={handlePlayAudio}
